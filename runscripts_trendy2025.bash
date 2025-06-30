@@ -12,7 +12,7 @@ STAGE=AD_SPINUP
 #STAGE=TRANSIENT_LU_TRANSIENT_CO2_CLIMATE
 
 if [ "$STAGE" = "AD_SPINUP" ]; then
-    SETUP_CASE=f19_0002_adspinup_const1700LUH
+    SETUP_CASE=f19_0003_adspinup_const1700LUH_swdif
 elif [ "$STAGE" = "POSTAD_SPINUP" ]; then
     SETUP_CASE=f19_0031_postadspinup_const1850LUH3
 elif [ "$STAGE" = "TRANSIENT_LU_CONSTANT_CO2_CLIMATE" ]; then

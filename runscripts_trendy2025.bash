@@ -163,11 +163,12 @@ elif [ "$STAGE" = "S2" ]; then
     ./xmlchange -file env_run.xml -id CCSM_BGC -val CO2A
     ./xmlchange -file env_run.xml -id CLM_CO2_TYPE -val diagnostic
     ./xmlchange -id ELM_BLDNML_OPTS -val "-bgc fates -no-megan -no-drydep"
+    ./xmlchange DATM_CLMNCEP_YR_ALIGN=1901
     ./xmlchange DATM_CLMNCEP_YR_START=1901
     ./xmlchange DATM_CLMNCEP_YR_END=2024
     ./xmlchange DATM_PRESAERO=clim_1850
 
-    ./xmlchange RESUBMIT=1
+    ./xmlchange RESUBMIT=0
     PRIOR_CASE='f19_0008_trendyS1'
     ./xmlchange RUN_REFCASE=${PRIOR_CASE}_${GITHASH1}_${GITHASH2}
     ./xmlchange RUN_REFDIR=/global/homes/c/cdkoven/scratch/e3sm_scratch/pm-cpu/${PRIOR_CASE}_${GITHASH1}_${GITHASH2}/run/
@@ -212,8 +213,8 @@ if [ "$COMPSET" = "I20TRTRENDY2025"  ]; then
     perl -w -i -p -e "s@datm.streams.txt.co2tseries.20tr 1850 1850 2007@datm.streams.txt.co2tseries.20tr 1700 1700 2024@" user_nl_datm
 fi
 
-./case.build
-./case.submit
+#./case.build
+#./case.submit
 
 #####
 ./xmlchange JOB_QUEUE=regular

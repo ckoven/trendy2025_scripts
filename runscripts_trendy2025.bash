@@ -10,9 +10,9 @@ GITHASH2=`git log -n 1 --format=%h`
 #STAGE=POSTAD_SPINUP
 #STAGE=S0   #constant climate, CO2, land use
 #STAGE=S1   #CO2 only (time-invariant “pre-industrial” climate and land use mask)
-STAGE=S2   #CO2 and climate only (time-invariant “pre-industrial” land use mask), branch from S1 in year 1901
+#STAGE=S2   #CO2 and climate only (time-invariant “pre-industrial” land use mask), branch from S1 in year 1901
 #STAGE=S3a  #CO2 and land use (repeat climate until year 1901)
-#STAGE=S3b  #CO2, climate and land use (all forcing time-varying after year 1901)
+STAGE=S3b  #CO2, climate and land use (all forcing time-varying after year 1901)
 
 if [ "$STAGE" = "AD_SPINUP" ]; then
     SETUP_CASE=f19_0005_adspinup_const1700LUH_swdif_2pftspasturerangeland
@@ -27,13 +27,13 @@ elif [ "$STAGE" = "S1" ]; then
     SETUP_CASE=f19_0008_trendyS1
     COMPSET=I20TRTRENDY2025
 elif [ "$STAGE" = "S2" ]; then
-    SETUP_CASE=f19_0010_trendyS2
+    SETUP_CASE=f19_0010_trendyS2_hybrid
     COMPSET=I20TRTRENDY2025
 elif [ "$STAGE" = "S3a" ]; then
     SETUP_CASE=f19_0009_trendyS3_parta
     COMPSET=I20TRTRENDY2025
 elif [ "$STAGE" = "S3b" ]; then
-    SETUP_CASE=f19_0011_trendyS3_partb
+    SETUP_CASE=f19_0011_trendyS3_partb_hybrid
     COMPSET=I20TRTRENDY2025
 fi
     
@@ -174,7 +174,10 @@ elif [ "$STAGE" = "S2" ]; then
     ./xmlchange RUN_REFDIR=/global/homes/c/cdkoven/scratch/e3sm_scratch/pm-cpu/${PRIOR_CASE}_${GITHASH1}_${GITHASH2}/run/
     ./xmlchange RUN_REFDATE=1901-01-01
     ./xmlchange GET_REFCASE=TRUE
-    ./xmlchange RUN_TYPE=branch
+
+    #./xmlchange RUN_TYPE=branch
+    ./xmlchange RUN_TYPE=hybrid
+    ./xmlchange RUN_STARTDATE=1901-01-01
     
     cat >> user_nl_elm <<EOF
 fluh_timeseries = '/global/homes/c/cdkoven/scratch/inputdata/LUH2_states_transitions_management.timeseries_1.9x2.5_trendy2025_steadystate_1700_2025-06-23.nc'
@@ -196,6 +199,32 @@ finidat='/global/homes/c/cdkoven/scratch/restfiles/f19_0006_postadspinup_const17
 fluh_timeseries = '/global/homes/c/cdkoven/scratch/inputdata/luh2_trendy2025_1.9x2.5_850-2024_23jun2025.nc'
 EOF
 
+elif [ "$STAGE" = "S3b" ]; then
+
+    ./xmlchange -file env_run.xml -id CCSM_BGC -val CO2A
+    ./xmlchange -file env_run.xml -id CLM_CO2_TYPE -val diagnostic
+    ./xmlchange -id ELM_BLDNML_OPTS -val "-bgc fates -no-megan -no-drydep"
+    
+    ./xmlchange DATM_CLMNCEP_YR_ALIGN=1901
+    ./xmlchange DATM_CLMNCEP_YR_START=1901
+    ./xmlchange DATM_CLMNCEP_YR_END=2024
+    ./xmlchange DATM_PRESAERO=clim_1850
+
+    ./xmlchange RESUBMIT=0
+    PRIOR_CASE='f19_0009_trendyS3_parta'
+    ./xmlchange RUN_REFCASE=${PRIOR_CASE}_${GITHASH1}_${GITHASH2}
+    ./xmlchange RUN_REFDIR=/global/homes/c/cdkoven/scratch/e3sm_scratch/pm-cpu/${PRIOR_CASE}_${GITHASH1}_${GITHASH2}/run/
+    ./xmlchange RUN_REFDATE=1901-01-01
+    ./xmlchange GET_REFCASE=TRUE
+
+    #./xmlchange RUN_TYPE=branch
+    ./xmlchange RUN_TYPE=hybrid
+    ./xmlchange RUN_STARTDATE=1901-01-01
+
+    cat >> user_nl_elm <<EOF
+fluh_timeseries = '/global/homes/c/cdkoven/scratch/inputdata/luh2_trendy2025_1.9x2.5_850-2024_23jun2025.nc'
+EOF
+
 
 
 fi
@@ -213,10 +242,10 @@ if [ "$COMPSET" = "I20TRTRENDY2025"  ]; then
     perl -w -i -p -e "s@datm.streams.txt.co2tseries.20tr 1850 1850 2007@datm.streams.txt.co2tseries.20tr 1700 1700 2024@" user_nl_datm
 fi
 
-#./case.build
-#./case.submit
+./case.build
+./case.submit
 
 #####
 ./xmlchange JOB_QUEUE=regular
-./xmlchange JOB_WALLCLOCK_TIME=17:00:00
+./xmlchange JOB_WALLCLOCK_TIME=21:00:00
 ./case.submit

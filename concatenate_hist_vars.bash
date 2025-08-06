@@ -23,9 +23,9 @@ while IFS= read -r line; do
     
     echo "Processing: $line"
     if (( ii % n_parallel == 0 )); then
-	ncrcat -4 -L 1 -cv $line $1.elm.h0.*.nc $output_dir/$1/$line.$1.nc
+	ncrcat -4 -L 1 -cv $line $1.elm.h0.*.nc $output_dir/$1/$1.tseries.$line.nc
     else
-	ncrcat -4 -L 1 -cv $line $1.elm.h0.*.nc $output_dir/$1/$line.$i.nc &
+	ncrcat -4 -L 1 -cv $line $1.elm.h0.*.nc $output_dir/$1/$1.tseries.$line.nc &
     fi
 
 done < "$file"
